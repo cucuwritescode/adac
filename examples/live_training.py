@@ -24,7 +24,7 @@ from collections import OrderedDict
 import torch
 from flamo.processor import dsp, system
 
-from rt_fdn import HotReload
+import rt_fdn
 
 
 def build_fdn(fs: int, nfft: int, n: int = 4):
@@ -56,7 +56,7 @@ def main() -> None:
     nfft = 2**12
     model, out_gain = build_fdn(args.fs, nfft)
 
-    live = HotReload(
+    live = rt_fdn.HotReload(
         args.fs, name="LiveTraining", dsp_path=args.dsp_path,
         controls={"rt60": True, "dry_wet": True},
     )

@@ -24,7 +24,7 @@ from collections import OrderedDict
 import torch
 from flamo.processor import dsp, system
 
-from rt_fdn import flamo_to_json, export_juce
+import rt_fdn
 
 
 def build_fdn(fs: int, nfft: int, n: int = 4):
@@ -63,8 +63,8 @@ def main() -> None:
 
     model = build_fdn(args.fs, nfft=2**15)
 
-    result = export_juce(
-        flamo_to_json(model, args.fs, name=args.name),
+    result = rt_fdn.export_juce(
+        rt_fdn.flamo_to_json(model, args.fs, name=args.name),
         args.out,
         name=args.name,
         controls={"rt60": True, "dry_wet": True, "pre_delay": True},

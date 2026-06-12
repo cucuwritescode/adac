@@ -66,10 +66,10 @@ building plugins additionally requires the [FAUST](https://faust.grame.fr) distr
 ## quick start
 
 ```python
-from rt_fdn import flamo_to_faust
+import rt_fdn
 
 #given a trained FLAMO model and sample rate
-faust_code = flamo_to_faust(model, fs=48000, name="MyReverb")
+faust_code = rt_fdn.flamo_to_faust(model, fs=48000, name="MyReverb")
 
 #write to file
 with open("reverb.dsp", "w") as f:
@@ -79,18 +79,14 @@ with open("reverb.dsp", "w") as f:
 or use the two-step pipeline for inspection:
 
 ```python
-from rt_fdn import flamo_to_json, json_to_faust
-
-config = flamo_to_json(model, fs=48000, name="MyReverb")
-faust_code = json_to_faust(config, controls={"rt60": True, "dry_wet": True})
+config = rt_fdn.flamo_to_json(model, fs=48000, name="MyReverb")
+faust_code = rt_fdn.json_to_faust(config, controls={"rt60": True, "dry_wet": True})
 ```
 
 ### hear it while it trains
 
 ```python
-from rt_fdn import HotReload
-
-live = HotReload(fs=48000, name="MyReverb", controls={"rt60": True})
+live = rt_fdn.HotReload(fs=48000, name="MyReverb", controls={"rt60": True})
 for step in range(n_steps):
     loss = criterion(model(x), target)
     loss.backward()
@@ -104,10 +100,8 @@ the hot-reload CLAP plugin (FAUST interpreter plus file watcher) lives in `faust
 ### ship it
 
 ```python
-from rt_fdn import flamo_to_json, export_juce
-
-export_juce(
-    flamo_to_json(model, fs=48000, name="MyReverb"),
+rt_fdn.export_juce(
+    rt_fdn.flamo_to_json(model, fs=48000, name="MyReverb"),
     "exported/", name="MyReverb",
     controls={"rt60": True, "dry_wet": True, "pre_delay": True},
     juce_modules="~/JUCE/modules",
@@ -120,9 +114,7 @@ one call: FAUST generation, stability certificate, JUCE project, release build, 
 ### certify
 
 ```python
-from rt_fdn import certify
-
-cert = certify(config)
+cert = rt_fdn.certify(config)
 print(cert["verdict"])
 ```
 

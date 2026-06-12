@@ -35,7 +35,7 @@ import numpy as np
 import torch
 from flamo.processor import dsp, system
 
-from rt_fdn import flamo_to_json, json_to_faust
+import rt_fdn
 
 FS = 48000
 NFFT = 2**15
@@ -108,7 +108,7 @@ def main() -> None:
 
     model = build_model(fb_scale=0.5)
     fl = flamo_irs(model)
-    code = json_to_faust(flamo_to_json(model, FS, name="StereoFDN"))
+    code = rt_fdn.json_to_faust(rt_fdn.flamo_to_json(model, FS, name="StereoFDN"))
 
     #no alignment needed, see module docstring
     fa = run_faust(code, "(impulse, 0.0)", "in0", workdir, NFFT)
@@ -153,10 +153,10 @@ def main() -> None:
 
     #figure 3: rt60 validation, lossless prototype for both variants
     model_ll = build_model(fb_scale=1.0)
-    cfg = flamo_to_json(model_ll, FS, name="RT")
-    ir_rt = run_faust(json_to_faust(cfg, controls={"rt60": {"init": 0.5}}),
+    cfg = rt_fdn.flamo_to_json(model_ll, FS, name="RT")
+    ir_rt = run_faust(rt_fdn.json_to_faust(cfg, controls={"rt60": {"init": 0.5}}),
                       "(impulse, 0.0)", "rt05", workdir, FS)[0]
-    ir_ll = run_faust(json_to_faust(cfg), "(impulse, 0.0)",
+    ir_ll = run_faust(rt_fdn.json_to_faust(cfg), "(impulse, 0.0)",
                       "lossless", workdir, FS)[0]
 
     tt = np.arange(FS) / FS
