@@ -5,7 +5,7 @@ one call from a flamo model to an installed, certified vst3/au plugin.
 
 requires (macos): the faust distribution (faust2juce), a juce checkout,
 projucer, and xcode. run inside an environment with flamo, torch and
-rt-fdn installed:
+adac installed:
 
     python export_plugin.py --name MyReverb \
         --juce-modules ~/JUCE/modules --build
@@ -24,7 +24,7 @@ from collections import OrderedDict
 import torch
 from flamo.processor import dsp, system
 
-import rt_fdn
+import adac
 
 
 def build_fdn(fs: int, nfft: int, n: int = 4):
@@ -56,15 +56,15 @@ def main() -> None:
     parser.add_argument("--out", default="exported")
     parser.add_argument("--juce-modules", default="~/JUCE/modules",
                         help="path to the juce modules folder")
-    parser.add_argument("--manufacturer", default="rt-fdn")
+    parser.add_argument("--manufacturer", default="adac")
     parser.add_argument("--build", action="store_true",
                         help="also compile and install vst3 + au (macos)")
     args = parser.parse_args()
 
     model = build_fdn(args.fs, nfft=2**15)
 
-    result = rt_fdn.export_juce(
-        rt_fdn.flamo_to_json(model, args.fs, name=args.name),
+    result = adac.export_juce(
+        adac.flamo_to_json(model, args.fs, name=args.name),
         args.out,
         name=args.name,
         controls={"rt60": True, "dry_wet": True, "pre_delay": True},

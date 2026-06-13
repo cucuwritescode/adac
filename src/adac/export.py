@@ -29,8 +29,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from rt_fdn.codegen.json_to_faust import json_to_faust, _safe_name
-from rt_fdn.certificate import certify, write_certificate
+from adac.codegen.json_to_faust import json_to_faust, _safe_name
+from adac.certificate import certify, write_certificate
 
 #verdicts that block a strict export
 _BLOCKING_VERDICTS = ("unstable", "not-certified")
@@ -119,7 +119,7 @@ def export_juce(
     faust2juce: str = "faust2juce",
     juce_modules: str | Path | None = None,
     extra_args: tuple[str, ...] = (),
-    manufacturer: str = "rt-fdn",
+    manufacturer: str = "adac",
     manufacturer_code: str | None = None,
     build: bool = False,
     projucer: str | None = None,

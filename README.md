@@ -1,8 +1,8 @@
 <div align="center">
 
-# rt-fdn
+# ADAC
 
-**real-time deployment of differentiable audio graphs via FAUST**
+**automatic differentiable audio compilation**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
@@ -17,14 +17,14 @@
 
 ## the problem
 
-researchers design and optimise FDNs using [FLAMO](https://github.com/gdalsanto/flamo)'s differentiable audio framework, but deploying these as real-time plugins requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools.
+researchers design and optimise audio processors in differentiable frameworks such as [FLAMO](https://github.com/gdalsanto/flamo), but deploying them as real-time plugins requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools. the worked example throughout is the feedback delay network (FDN), which exercises every part of the compiler.
 
 ```
 before:   FLAMO model (PyTorch)  →  ???  →  real-time plugin
                                      ↑
                                 manual rewrite
 
-after:    FLAMO model (PyTorch)  →  rt_fdn  →  FAUST  →  plugin
+after:    FLAMO model (PyTorch)  →  adac  →  FAUST  →  plugin
 ```
 
 ## how it works
@@ -66,10 +66,10 @@ building plugins additionally requires the [FAUST](https://faust.grame.fr) distr
 ## quick start
 
 ```python
-import rt_fdn
+import adac
 
 #given a trained FLAMO model and sample rate
-faust_code = rt_fdn.flamo_to_faust(model, fs=48000, name="MyReverb")
+faust_code = adac.flamo_to_faust(model, fs=48000, name="MyReverb")
 
 #write to file
 with open("reverb.dsp", "w") as f:
@@ -79,14 +79,14 @@ with open("reverb.dsp", "w") as f:
 or use the two-step pipeline for inspection:
 
 ```python
-config = rt_fdn.flamo_to_json(model, fs=48000, name="MyReverb")
-faust_code = rt_fdn.json_to_faust(config, controls={"rt60": True, "dry_wet": True})
+config = adac.flamo_to_json(model, fs=48000, name="MyReverb")
+faust_code = adac.json_to_faust(config, controls={"rt60": True, "dry_wet": True})
 ```
 
 ### hear it while it trains
 
 ```python
-live = rt_fdn.HotReload(fs=48000, name="MyReverb", controls={"rt60": True})
+live = adac.HotReload(fs=48000, name="MyReverb", controls={"rt60": True})
 for step in range(n_steps):
     loss = criterion(model(x), target)
     loss.backward()
@@ -100,8 +100,8 @@ the hot-reload CLAP plugin (FAUST interpreter plus file watcher) lives in `faust
 ### ship it
 
 ```python
-rt_fdn.export_juce(
-    rt_fdn.flamo_to_json(model, fs=48000, name="MyReverb"),
+adac.export_juce(
+    adac.flamo_to_json(model, fs=48000, name="MyReverb"),
     "exported/", name="MyReverb",
     controls={"rt60": True, "dry_wet": True, "pre_delay": True},
     juce_modules="~/JUCE/modules",
@@ -114,7 +114,7 @@ one call: FAUST generation, stability certificate, JUCE project, release build, 
 ### certify
 
 ```python
-cert = rt_fdn.certify(config)
+cert = adac.certify(config)
 print(cert["verdict"])
 ```
 
@@ -168,7 +168,7 @@ integration tests compare impulse responses between FLAMO (frequency domain) and
 ## project structure
 
 ```
-src/rt_fdn/
+src/adac/
   codegen/
     flamo_to_json.py     parameter extraction and graph traversal
     json_to_faust.py     FAUST code generation and macro-controls

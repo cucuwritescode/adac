@@ -13,8 +13,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import rt_fdn.hotreload as hotreload_module
-from rt_fdn.hotreload import HotReload
+import adac.hotreload as hotreload_module
+from adac.hotreload import HotReload
 
 
 #mock flamo module (matches conventions in test_flamo_to_json.py)

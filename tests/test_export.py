@@ -15,8 +15,8 @@ import json
 
 import pytest
 
-import rt_fdn.export as export_module
-from rt_fdn.export import export_juce
+import adac.export as export_module
+from adac.export import export_juce
 
 
 HADAMARD4 = [
@@ -163,10 +163,10 @@ class TestExportJuce:
         result = export_juce(_loop_config(0.9), tmp_path, name="My Reverb 2!")
         assert result["dsp"].name == "My_Reverb_2_.dsp"
 
-    def test_manufacturer_defaults_to_rt_fdn(self, tmp_path, fake_faust2juce):
+    def test_manufacturer_defaults_to_adac(self, tmp_path, fake_faust2juce):
         result = export_juce(_loop_config(0.9), tmp_path, name="Verb")
         jucer = (result["project"] / "Verb.jucer").read_text()
-        assert 'pluginManufacturer="rt-fdn"' in jucer
+        assert 'pluginManufacturer="adac"' in jucer
         assert "GRAME" not in jucer
         #the four-char code is identity: untouched unless requested
         assert 'pluginManufacturerCode="Manu"' in jucer

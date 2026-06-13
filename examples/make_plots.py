@@ -13,7 +13,7 @@ two figures, styled for the paper (serif, no internal titles)
                       -120 db/s line and the lossless reference
 
 requires faust2plot on PATH and an environment with flamo, torch,
-matplotlib and rt-fdn installed.
+matplotlib and adac installed.
 
 alignment: the emitted code compensates the ~ operator inside the
 loop and re-delays the recursion output by one sample, so arrivals
@@ -45,7 +45,7 @@ import numpy as np
 import torch
 from flamo.processor import dsp, system
 
-import rt_fdn
+import adac
 
 FS = 48000
 NFFT = 2**15
@@ -114,11 +114,11 @@ def edc_db(ir: np.ndarray) -> np.ndarray:
 
 def main() -> None:
     OUTDIR.mkdir(exist_ok=True)
-    workdir = Path(tempfile.mkdtemp(prefix="rt-fdn-plots-"))
+    workdir = Path(tempfile.mkdtemp(prefix="adac-plots-"))
 
     model = build_model(fb_scale=0.5)
     fl = flamo_irs(model)
-    code = rt_fdn.json_to_faust(rt_fdn.flamo_to_json(model, FS, name="StereoFDN"))
+    code = adac.json_to_faust(adac.flamo_to_json(model, FS, name="StereoFDN"))
 
     #no alignment needed, see module docstring
     fa = run_faust(code, "(impulse, 0.0)", "in0", workdir, NFFT)
@@ -146,10 +146,10 @@ def main() -> None:
 
     #figure 2, rt60 validation, lossless prototype for both variants
     model_ll = build_model(fb_scale=1.0)
-    cfg = rt_fdn.flamo_to_json(model_ll, FS, name="RT")
-    ir_rt = run_faust(rt_fdn.json_to_faust(cfg, controls={"rt60": {"init": 0.5}}),
+    cfg = adac.flamo_to_json(model_ll, FS, name="RT")
+    ir_rt = run_faust(adac.json_to_faust(cfg, controls={"rt60": {"init": 0.5}}),
                       "(impulse, 0.0)", "rt05", workdir, FS)[0]
-    ir_ll = run_faust(rt_fdn.json_to_faust(cfg), "(impulse, 0.0)",
+    ir_ll = run_faust(adac.json_to_faust(cfg), "(impulse, 0.0)",
                       "lossless", workdir, FS)[0]
 
     tt = np.arange(FS) / FS

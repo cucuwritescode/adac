@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from rt_fdn.codegen.flamo_to_json import flamo_to_json
-from rt_fdn.codegen.json_to_faust import json_to_faust
+from adac.codegen.flamo_to_json import flamo_to_json
+from adac.codegen.json_to_faust import json_to_faust
 
 
 def flamo_to_faust(

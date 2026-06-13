@@ -14,7 +14,7 @@ from collections import OrderedDict
 import numpy as np
 import pytest
 
-from rt_fdn.codegen.flamo_to_json import (
+from adac.codegen.flamo_to_json import (
     flamo_to_json,
     _classify_gain,
     _extract_param,

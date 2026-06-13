@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from rt_fdn.codegen.json_to_faust import json_to_faust
+from adac.codegen.json_to_faust import json_to_faust
 
 
 #helpers

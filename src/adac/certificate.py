@@ -31,7 +31,7 @@ from typing import Any
 
 import numpy as np
 
-from rt_fdn.codegen.json_to_faust import _normalise_controls
+from adac.codegen.json_to_faust import _normalise_controls
 
 #classification tolerance around a loop gain of exactly one. wide
 #enough to absorb float32 rounding of a genuinely orthogonal matrix
@@ -363,7 +363,7 @@ def certify(
     certificate: dict[str, Any] = {
         "name": config.get("name", "untitled"),
         "fs": int(fs),
-        "generated_by": "rt-fdn",
+        "generated_by": "adac",
         "method": (
             "small-gain: product of per-element spectral norms over "
             f"{int(n_freq)} frequencies, sufficient condition for "

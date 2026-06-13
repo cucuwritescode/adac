@@ -7,7 +7,7 @@ setup, once:
   1. build the hot-reload clap plugin (faust/architecture/clap) and
      load it on a track in your daw
   2. run this script inside an environment with flamo, torch and
-     rt-fdn installed
+     adac installed
 
 every optimiser step re-emits the model to faust and atomically
 rewrites the watched .dsp; the plugin reloads it in ~100 ms. the
@@ -24,7 +24,7 @@ from collections import OrderedDict
 import torch
 from flamo.processor import dsp, system
 
-import rt_fdn
+import adac
 
 
 def build_fdn(fs: int, nfft: int, n: int = 4):
@@ -49,14 +49,14 @@ def main() -> None:
     parser.add_argument("--fs", type=int, default=48000)
     parser.add_argument("--steps", type=int, default=200)
     parser.add_argument("--lr", type=float, default=0.05)
-    parser.add_argument("--dsp-path", default="/tmp/rt-fdn-live.dsp",
+    parser.add_argument("--dsp-path", default="/tmp/adac-live.dsp",
                         help="where the watched .dsp is written")
     args = parser.parse_args()
 
     nfft = 2**12
     model, out_gain = build_fdn(args.fs, nfft)
 
-    live = rt_fdn.HotReload(
+    live = adac.HotReload(
         args.fs, name="LiveTraining", dsp_path=args.dsp_path,
         controls={"rt60": True, "dry_wet": True},
     )

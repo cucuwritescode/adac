@@ -16,7 +16,7 @@ each optimiser step. the model is re-emitted to faust and published
 only when the generated code actually changed, subject to step and
 time throttles, so a paused or converged optimisation causes no reloads.
 
-    from rt_fdn import HotReload
+    from adac import HotReload
 
     live = HotReload(fs=48000, name="MyReverb")
     for step in range(n_steps):
@@ -38,11 +38,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-from rt_fdn.codegen.flamo_to_faust import flamo_to_faust
+from adac.codegen.flamo_to_faust import flamo_to_faust
 
 #paths matching the defaults baked into the clap plugin
 DEFAULT_CONFIG_PATH = "/tmp/faust-current-dsp.txt"
-DEFAULT_DSP_PATH = "/tmp/rt-fdn-live.dsp"
+DEFAULT_DSP_PATH = "/tmp/adac-live.dsp"
 
 
 def _atomic_write(path: Path, text: str) -> None:

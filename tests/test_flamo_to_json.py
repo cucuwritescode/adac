@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from rt_fdn.codegen.flamo_to_json import (
+from adac.codegen.flamo_to_json import (
     flamo_to_json,
     _classify_gain,
     _detect_module_type,
@@ -217,7 +217,7 @@ class TestFractionalDelays:
 
     def test_emitted_alongside_integer_samples(self):
         #flamo_to_json should include both fields for parallelDelay
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         delay = parallelDelay(np.array([0.023, 0.030]), fs=48000.0)
         node = _serialise_leaf(delay, "d", fs=48000.0)
@@ -305,7 +305,7 @@ class TestEffectiveParam:
     """
 
     def test_identity_gain_has_no_param_raw(self):
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         values = 0.5 * np.eye(3)
         node = _serialise_leaf(Gain(values), "g", fs=48000.0)
@@ -313,7 +313,7 @@ class TestEffectiveParam:
         assert "param_raw" not in node.get("flamo", {})
 
     def test_explicit_identity_map_has_no_param_raw(self):
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         values = 0.5 * np.eye(3)
         g = Gain(values)
@@ -323,7 +323,7 @@ class TestEffectiveParam:
         assert "param_raw" not in node.get("flamo", {})
 
     def test_orthogonal_map_serialises_effective_matrix(self):
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         #mimics matrix_type="orthogonal": raw skew-symmetric weights,
         #effective matrix is their exponential. for a 2x2 skew matrix
@@ -350,7 +350,7 @@ class TestEffectiveParam:
         np.testing.assert_allclose(node["flamo"]["param_raw"], raw)
 
     def test_householder_serialises_full_effective_matrix(self):
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         #u = [1,1,1,1] normalises to [0.5]*4, so I - 2uu^T has 0.5 on
         #the diagonal and -0.5 everywhere else
@@ -369,7 +369,7 @@ class TestEffectiveParam:
         )
 
     def test_failing_map_falls_back_to_raw(self):
-        from rt_fdn.codegen.flamo_to_json import _serialise_leaf
+        from adac.codegen.flamo_to_json import _serialise_leaf
 
         values = 0.5 * np.eye(2)
         m = Matrix(values)

@@ -17,7 +17,7 @@ import math
 import numpy as np
 import pytest
 
-from rt_fdn.certificate import certify, write_certificate
+from adac.certificate import certify, write_certificate
 
 
 #config builders
