@@ -125,13 +125,13 @@ the criterion is small-gain: the product of per-element spectral norms around ea
 generated FAUST matches FLAMO sample-exactly, direct paths included. the energy decay of the compiled plugin follows the FLAMO reference throughout, and the underlying impulse responses agree to within single-precision arithmetic noise. all four stereo paths match identically; the suite pins them.
 
 <p align="center">
-<img src="plots/edc_match.png" width="70%">
+<img src="plots/edc_match.png" width="55%">
 </p>
 
 the rt60 macro-control on the compiled plugin, measured by Schroeder integration, follows the ideal decay for the slider value:
 
 <p align="center">
-<img src="plots/rt60_validation.png" width="70%">
+<img src="plots/rt60_validation.png" width="55%">
 </p>
 
 regenerate the figures with `python examples/make_plots.py`.
@@ -161,7 +161,7 @@ pytest tests/ -q --ignore=tests/integration
 pytest tests/integration/ -v
 ```
 
-195 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
+200 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
 
 integration tests compare impulse responses between FLAMO (frequency domain) and generated FAUST (time domain) sample-by-sample.
 

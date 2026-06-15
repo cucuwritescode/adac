@@ -10,13 +10,14 @@ with llvm-compiled dsp, no interpreter overhead in the shipped
 artifact. macro-control sliders become automatable daw parameters in
 every format without per-target work.
 
-the exporter is certificate-aware. by default it refuses to ship a
-model whose stability certificate says "unstable" (internally unstable
-filter sections) or "not-certified" (loop gain bound above one). a
-marginally stable lossless prototype passes, as does an indeterminate
-one (absence of proof is not proof of absence); the certificate is
-written next to the .dsp either way so the verdict travels with the
-artifact.
+the exporter is certificate-aware. by default it ships only what the
+certificate can vouch for: it refuses any verdict other than
+"certified-stable" or "marginally-stable". that means "unstable"
+(internally unstable filter sections), "not-certified" (loop gain
+bound above one), and "indeterminate" (a feedback loop the analysis
+could not bound, e.g. an unknown module inside a recursion) are all
+blocked unless strict is disabled. the certificate is written next to
+the .dsp either way so the verdict travels with the artifact.
 """
 
 from __future__ import annotations
@@ -32,8 +33,10 @@ from typing import Any
 from adac.codegen.json_to_faust import json_to_faust, _safe_name
 from adac.certificate import certify, write_certificate
 
-#verdicts that block a strict export
-_BLOCKING_VERDICTS = ("unstable", "not-certified")
+#verdicts that block a strict export. only certified-stable and
+#marginally-stable pass; indeterminate (an unbounded feedback loop)
+#is refused because the analysis could not prove it safe.
+_BLOCKING_VERDICTS = ("unstable", "not-certified", "indeterminate")
 
 #default projucer location on macos when not on PATH
 _PROJUCER_APP = "/Applications/Projucer.app/Contents/MacOS/Projucer"
@@ -144,8 +147,9 @@ def export_juce(
         compute the stability certificate and write it next to the
         .dsp (config form only).
     strict : bool
-        refuse to export when the certificate verdict is "unstable"
-        or "not-certified". marginal and indeterminate verdicts pass.
+        export only certified-stable or marginally-stable models;
+        unstable, not-certified, and indeterminate verdicts are
+        refused. set False to export regardless.
     standalone : bool
         generate a standalone application project instead of a plugin.
     faust2juce : str

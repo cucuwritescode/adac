@@ -122,6 +122,18 @@ class TestExportJuce:
         assert result["verdict"] == "not-certified"
         assert result["project"].is_dir()
 
+    def test_strict_blocks_indeterminate(self, tmp_path, fake_faust2juce):
+        #an unknown module inside the loop yields an unbounded verdict,
+        #which the analysis cannot prove safe, so strict export refuses it
+        config = _loop_config(0.9)
+        config["fF"] = {
+            "type": "Leaf", "name": "mystery", "module_type": "NeuralBlock",
+            "params": {}, "input_channels": 4, "output_channels": 4,
+        }
+        with pytest.raises(ValueError, match="indeterminate"):
+            export_juce(config, tmp_path, name="Unknown")
+        assert fake_faust2juce == []
+
     def test_marginal_lossless_passes_strict(self, tmp_path, fake_faust2juce):
         result = export_juce(_loop_config(1.0), tmp_path, name="Lossless")
         assert result["verdict"] == "marginally-stable"
