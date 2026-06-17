@@ -7,6 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-200%20passing-brightgreen.svg)](#testing)
+[![Documentation Status](https://readthedocs.org/projects/adac/badge/?version=latest)](https://adac.readthedocs.io/en/latest/)
 ![Status](https://img.shields.io/badge/status-beta-yellow.svg)
 
 *from differentiable audio research to efficient real-time DSP*
@@ -15,23 +16,26 @@
 
 ---
 
+> [**Documentation**](https://adac.readthedocs.io) ·
+> [**Report a Bug**](https://github.com/cucuwritescode/adac/issues)
+
 ## the problem
 
 researchers design and optimise audio processors in differentiable frameworks such as [FLAMO](https://github.com/gdalsanto/flamo), but deploying them as real-time plugins requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools. the worked example throughout is the feedback delay network (FDN), which exercises every part of the compiler.
 
 ```
-before:   FLAMO model (PyTorch)  →  ???  →  real-time plugin
-                                     ↑
-                                manual rewrite
+before:   trained model (PyTorch)  →  ???  →  real-time plugin
+                                       ↑
+                                  manual rewrite
 
-after:    FLAMO model (PyTorch)  →  adac  →  FAUST  →  plugin
+after:    trained model (PyTorch)  →  adac  →  FAUST  →  plugin
 ```
 
 ## how it works
 
 ```
 ┌──────────────┐       ┌──────────────┐       ┌──────────────┐
-│    FLAMO     │  ───▶ │     JSON     │  ───▶ │    FAUST     │
+│   trained    │  ───▶ │     JSON     │  ───▶ │    FAUST     │
 │    model     │  ◀─── │    config    │       │    code      │
 │  (PyTorch)   │       │              │       │   (.dsp)     │
 └──────────────┘       └──────────────┘       └──────────────┘
@@ -40,7 +44,7 @@ after:    FLAMO model (PyTorch)  →  adac  →  FAUST  →  plugin
          ╰───────────── flamo_to_faust() ──────────────╯
 ```
 
-the pipeline traverses a FLAMO model graph, extracts all parameters (delays, gains, matrices, filters), serialises them to a JSON intermediate representation, and generates valid FAUST DSP code. extraction is map-aware: matrix types with non-identity maps (orthogonal, hadamard, householder) serialise the effective matrix the model applies, with the raw trainable weights preserved for round-tripping. `json_to_flamo` reconstructs the original model from the config.
+the pipeline traverses the model graph, extracts all parameters (delays, gains, matrices, filters), serialises them to a JSON intermediate representation, and generates valid FAUST DSP code. extraction is map-aware: matrix types with non-identity maps (orthogonal, hadamard, householder) serialise the effective matrix the model applies, with the raw trainable weights preserved for round-tripping. `json_to_flamo` reconstructs the original model from the config.
 
 on top of the codegen core:
 
@@ -55,7 +59,7 @@ on top of the codegen core:
 pip install -e .
 ```
 
-for full FLAMO model support (requires PyTorch):
+for full model support (requires PyTorch):
 
 ```bash
 pip install -e ".[full]"
@@ -68,7 +72,7 @@ building plugins additionally requires the [FAUST](https://faust.grame.fr) distr
 ```python
 import adac
 
-#given a trained FLAMO model and sample rate
+#given a trained model and sample rate
 faust_code = adac.flamo_to_faust(model, fs=48000, name="MyReverb")
 
 #write to file
@@ -122,7 +126,7 @@ the criterion is small-gain: the product of per-element spectral norms around ea
 
 ## equivalence
 
-generated FAUST matches FLAMO sample-exactly, direct paths included. the energy decay of the compiled plugin follows the FLAMO reference throughout, and the underlying impulse responses agree to within single-precision arithmetic noise. all four stereo paths match identically; the suite pins them.
+generated FAUST matches the source model sample-exactly, direct paths included. the energy decay of the compiled plugin follows the reference throughout, and the underlying impulse responses agree to within single-precision arithmetic noise. all four stereo paths match identically; the suite pins them.
 
 <p align="center">
 <img src="plots/edc_match.png" width="55%">
@@ -138,7 +142,7 @@ regenerate the figures with `python examples/make_plots.py`.
 
 ## supported modules
 
-| FLAMO module | FAUST output | description |
+| source module | FAUST output | description |
 |---|---|---|
 | `parallelDelay` | `@(n)` / `de.fdelay` | integer or fractional sample delays |
 | `Gain` / `Matrix` | sum-of-products function | mixing matrices (hoisted, map-aware) |
@@ -157,13 +161,13 @@ regenerate the figures with `python examples/make_plots.py`.
 #unit tests (no external dependencies)
 pytest tests/ -q --ignore=tests/integration
 
-#integration tests (requires flamo venv + faust compiler)
+#integration tests (requires the full install + faust compiler)
 pytest tests/integration/ -v
 ```
 
 200 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
 
-integration tests compare impulse responses between FLAMO (frequency domain) and generated FAUST (time domain) sample-by-sample.
+integration tests compare impulse responses between the source model (frequency domain) and generated FAUST (time domain) sample-by-sample.
 
 ## project structure
 
