@@ -85,6 +85,9 @@ venv.bak/
 docs/_build/
 docs/generated/
 
+# source archives
+*.zip
+
 # mypy
 .mypy_cache/
 .dmypy.json
