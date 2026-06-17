@@ -182,9 +182,9 @@ def export_juce(
     returns
     -------
     result : dict
-        {"dsp": Path, "project": Path, "certificate": Path | None,
-         "verdict": str | None}, plus with build=True:
-        {"vst3": Path | None, "au": Path | None, "installed": [Path]}
+        keys ``dsp``, ``project``, ``certificate`` and ``verdict``.
+        with build=True it also carries ``vst3``, ``au`` and
+        ``installed``, the paths of the built and installed plugins.
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
