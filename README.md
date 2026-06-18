@@ -14,6 +14,17 @@
 
 </div>
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/fig2-dark.svg">
+    <img src="assets/fig2-light.svg" alt="pipeline: differentiable model (PyTorch/FLAMO) to JSON intermediate representation to FAUST .dsp, and from there to plugins, web, embedded, and FPGA targets" width="100%">
+  </picture>
+</p>
+
+<p align="center">
+  compile trained models to real-time DSP&nbsp; · &nbsp;hear the optimisation as it trains&nbsp; · &nbsp;stability-certified before every export
+</p>
+
 ---
 
 > [**Documentation**](https://adac.readthedocs.io) ·
@@ -21,49 +32,26 @@
 
 ## the problem
 
-researchers design and optimise audio processors in differentiable frameworks such as [FLAMO](https://github.com/gdalsanto/flamo), but deploying them as real-time plugins requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools. the worked example throughout is the feedback delay network (FDN), which exercises every part of the compiler.
-
-```mermaid
-flowchart LR
-    subgraph before
-        direction LR
-        m1["trained model<br/>(PyTorch)"] -. manual rewrite .-> p1["real-time plugin"]
-    end
-    subgraph after
-        direction LR
-        m2["trained model<br/>(PyTorch)"] --> a["adac"] --> f["FAUST"] --> p2["plugin"]
-    end
-```
+researchers design and optimise audio processors in differentiable frameworks such as [FLAMO](https://github.com/gdalsanto/flamo), but deploying them as efficient real-time DSP requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools. the worked example throughout is the feedback delay network (FDN), which exercises every part of the compiler.
 
 ## how it works
-
-```mermaid
-flowchart LR
-    M["trained model<br/>(PyTorch)"] -->|flamo_to_json| J["JSON<br/>config"]
-    J -->|json_to_flamo| M
-    J -->|json_to_faust| F["FAUST<br/>code (.dsp)"]
-    M -. flamo_to_faust .-> F
-```
 
 the pipeline traverses the model graph, extracts all parameters (delays, gains, matrices, filters), serialises them to a JSON intermediate representation, and generates valid FAUST DSP code. extraction is map-aware: matrix types with non-identity maps (orthogonal, hadamard, householder) serialise the effective matrix the model applies, with the raw trainable weights preserved for round-tripping. `json_to_flamo` reconstructs the original model from the config.
 
 on top of the codegen core:
 
-- `HotReload` republishes the model to a running FAUST plugin during training, so you hear the optimisation while it runs
-- macro-controls (`rt60`, `dry_wet`, `pre_delay`) add performance knobs to the generated plugin without touching the trained parameters
-- `certify` computes a stability certificate for every feedback loop, written as `.cert.json` next to the `.dsp`
-- `export_juce` turns a config into an installed VST3/AU plugin in one call
+| | |
+|---|---|
+| **`HotReload`** | republishes the model to a running FAUST plugin during training, so you hear the optimisation while it runs |
+| **macro-controls** | `rt60`, `dry_wet`, and `pre_delay` knobs layered onto the generated plugin without touching the trained parameters |
+| **`certify`** | computes a stability certificate for every feedback loop, written as `.cert.json` next to the `.dsp` |
+| **`export_juce`** | turns a config into an installed VST3/AU plugin in one call |
 
 ## installation
 
 ```bash
-pip install -e .
-```
-
-for full model support (requires PyTorch):
-
-```bash
-pip install -e ".[full]"
+pip install -e .          #core compiler, numpy only
+pip install -e ".[full]"  #full model support: flamo + pytorch
 ```
 
 building plugins additionally requires the [FAUST](https://faust.grame.fr) distribution and [JUCE](https://juce.com).
@@ -88,7 +76,9 @@ config = adac.flamo_to_json(model, fs=48000, name="MyReverb")
 faust_code = adac.json_to_faust(config, controls={"rt60": True, "dry_wet": True})
 ```
 
-### hear it while it trains
+<details>
+<summary><b>hear it while it trains</b></summary>
+<br>
 
 ```python
 live = adac.HotReload(fs=48000, name="MyReverb", controls={"rt60": True})
@@ -102,7 +92,11 @@ live.update(model, force=True)
 
 the hot-reload CLAP plugin (FAUST interpreter plus file watcher) lives in `faust/architecture/clap/`. reloads take about 100 ms and knob positions survive them. full script: `examples/live_training.py`.
 
-### ship it
+</details>
+
+<details>
+<summary><b>ship it</b></summary>
+<br>
 
 ```python
 adac.export_juce(
@@ -116,7 +110,11 @@ adac.export_juce(
 
 one call: FAUST generation, stability certificate, JUCE project, release build, install into the user plugin folders (macOS). the export refuses to build a model whose certificate says `unstable` or `not-certified`; pass `strict=False` to override. full script: `examples/export_plugin.py`.
 
-### certify
+</details>
+
+<details>
+<summary><b>certify</b></summary>
+<br>
 
 ```python
 cert = adac.certify(config)
@@ -125,21 +123,38 @@ print(cert["verdict"])
 
 the criterion is small-gain: the product of per-element spectral norms around each feedback loop must stay below one at every frequency, evaluated on the parameter values as emitted (single precision). verdicts are `certified-stable`, `marginally-stable`, `indeterminate`, `not-certified`, `unstable`. a lossless prototype is marginally stable; with the `rt60` control it is certified at any knob position.
 
+</details>
+
 ## equivalence
 
 generated FAUST matches the source model sample-exactly, direct paths included. the energy decay of the compiled plugin follows the reference throughout, and the underlying impulse responses agree to within single-precision arithmetic noise. all four stereo paths match identically; the suite pins them.
 
 <p align="center">
-<img src="plots/edc_match.png" width="55%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="plots/equivalence-dark.png">
+    <img src="plots/equivalence.png" width="60%">
+  </picture>
 </p>
 
-the rt60 macro-control on the compiled plugin, measured by Schroeder integration, follows the ideal decay for the slider value:
+the rt60 macro-control, measured by Schroeder integration, follows the ideal decay for the slider value:
 
 <p align="center">
-<img src="plots/rt60_validation.png" width="55%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="plots/rt60_validation-dark.png">
+    <img src="plots/rt60_validation.png" width="60%">
+  </picture>
 </p>
 
-regenerate the figures with `python examples/make_plots.py`.
+cost stays well within real time as the network grows: a 32-line FDN, a large reverberator, runs at roughly ninety times real time on a single core, tracking the predicted Θ(N²) until the feedback matrix exceeds the cache.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="plots/scaling-dark.png">
+    <img src="plots/scaling.png" width="60%">
+  </picture>
+</p>
+
+regenerate the light figures with `python examples/make_plots.py`, then the dark variants with `python examples/make_dark_plots.py`.
 
 ## supported modules
 
@@ -159,11 +174,8 @@ regenerate the figures with `python examples/make_plots.py`.
 ## testing
 
 ```bash
-#unit tests (no external dependencies)
-pytest tests/ -q --ignore=tests/integration
-
-#integration tests (requires the full install + faust compiler)
-pytest tests/integration/ -v
+pytest                 #unit tests
+pytest -m integration  #integration, needs faust + full install
 ```
 
 200 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
@@ -186,6 +198,7 @@ examples/
     live_training.py
     export_plugin.py
     make_plots.py
+    make_dark_plots.py
 tests/
     test_flamo_to_json.py
     test_json_to_faust.py
@@ -205,6 +218,6 @@ tests/
 - [pyFDN](https://github.com/artificial-audio/pyFDN) — python feedback delay networks
 - [FAUST](https://faust.grame.fr/) — functional audio stream
 
-## licence
+## license
 
 MIT — see [LICENSE](LICENSE) for details.
