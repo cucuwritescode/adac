@@ -23,25 +23,26 @@
 
 researchers design and optimise audio processors in differentiable frameworks such as [FLAMO](https://github.com/gdalsanto/flamo), but deploying them as real-time plugins requires manual reimplementation. this is error-prone and creates a gap between research prototypes and usable tools. the worked example throughout is the feedback delay network (FDN), which exercises every part of the compiler.
 
-```
-before:   trained model (PyTorch)  →  ???  →  real-time plugin
-                                       ↑
-                                  manual rewrite
-
-after:    trained model (PyTorch)  →  adac  →  FAUST  →  plugin
+```mermaid
+flowchart LR
+    subgraph before
+        direction LR
+        m1["trained model<br/>(PyTorch)"] -. manual rewrite .-> p1["real-time plugin"]
+    end
+    subgraph after
+        direction LR
+        m2["trained model<br/>(PyTorch)"] --> a["adac"] --> f["FAUST"] --> p2["plugin"]
+    end
 ```
 
 ## how it works
 
-```
-┌──────────────┐       ┌──────────────┐       ┌──────────────┐
-│   trained    │  ───▶ │     JSON     │  ───▶ │    FAUST     │
-│    model     │  ◀─── │    config    │       │    code      │
-│  (PyTorch)   │       │              │       │   (.dsp)     │
-└──────────────┘       └──────────────┘       └──────────────┘
-       flamo_to_json() ──▶     json_to_faust() ──▶
-       json_to_flamo() ◀──
-         ╰───────────── flamo_to_faust() ──────────────╯
+```mermaid
+flowchart LR
+    M["trained model<br/>(PyTorch)"] -->|flamo_to_json| J["JSON<br/>config"]
+    J -->|json_to_flamo| M
+    J -->|json_to_faust| F["FAUST<br/>code (.dsp)"]
+    M -. flamo_to_faust .-> F
 ```
 
 the pipeline traverses the model graph, extracts all parameters (delays, gains, matrices, filters), serialises them to a JSON intermediate representation, and generates valid FAUST DSP code. extraction is map-aware: matrix types with non-identity maps (orthogonal, hadamard, householder) serialise the effective matrix the model applies, with the raw trainable weights preserved for round-tripping. `json_to_flamo` reconstructs the original model from the config.
