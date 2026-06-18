@@ -40,3 +40,11 @@ docs = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+#integration tests need the faust toolchain and a full install, so the
+#default run skips them; opt in with `pytest -m integration`.
+addopts = "-m 'not integration'"
+markers = [
+    "integration: end-to-end tests requiring the faust toolchain and a full install",
+]
