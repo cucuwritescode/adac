@@ -6,7 +6,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-200%20passing-brightgreen.svg)](#testing)
+[![ci](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml/badge.svg)](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/adac/badge/?version=latest)](https://adac.readthedocs.io/en/latest/)
 ![Status](https://img.shields.io/badge/status-beta-yellow.svg)
 
