@@ -4,9 +4,10 @@
 
 **Automatic Differentiable Audio Compilation**
 
+[![arXiv](https://img.shields.io/badge/arXiv-2606.21277-b31b1b.svg)](https://arxiv.org/abs/2606.21277)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
-[![ci](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml/badge.svg)](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![ci](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cucuwritescode/adac/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/adac/badge/?version=latest)](https://adac.readthedocs.io/en/latest/)
 ![Status](https://img.shields.io/badge/status-beta-yellow.svg)
 
@@ -27,6 +28,7 @@
 
 ---
 
+> [**Paper (arXiv)**](https://arxiv.org/abs/2606.21277) ·
 > [**Documentation**](https://adac.readthedocs.io) ·
 > [**Report a Bug**](https://github.com/cucuwritescode/adac/issues)
 
@@ -178,7 +180,7 @@ pytest                 #unit tests
 pytest -m integration  #integration, needs faust + full install
 ```
 
-200 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
+201 unit tests validate the full pipeline: map-aware parameter extraction, delay quantisation, SOS normalisation, gain classification, graph traversal, code generation, macro-control wiring, multichannel arities, hot-reload publishing, certificate verdicts, and export orchestration.
 
 integration tests compare impulse responses between the source model (frequency domain) and generated FAUST (time domain) sample-by-sample.
 
